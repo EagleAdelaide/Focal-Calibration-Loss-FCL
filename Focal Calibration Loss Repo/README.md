@@ -1,0 +1,61 @@
+# Euclidean Calibration Baselines (CIFAR-10/100)
+
+Modular, reproducible code for training classification backbones on CIFAR with multiple loss functions, post-hoc **temperature scaling**, and **reliability diagrams**. The code supports **multi-machine mutual exclusion** via lock files so the same run won't start twice across servers.
+
+## Structure
+```
+.
+├── calibration.py    # metrics, temperature scaling, ECE/AdaECE/Classwise-ECE helpers
+├── data.py           # CIFAR loaders
+├── environment.yml   # conda environment
+├── evaluate.py       # evaluate (optionally with TS) + reliability diagram
+├── losses.py         # CE, Brier, CE+Brier, Focal, Label Smoothing
+├── models.py         # CIFAR backbones: ResNet-50 (CIFAR-style), ResNet-110, WRN-28-10, DenseNet-121
+├── reliability.py    # plotting utilities (reliability diagram)
+├── train.py          # training loop with CSV logging, TS, checkpoint saving, lock
+├── utils.py          # seeding, ETA formatting, cross-host lock helpers
+└── verify.py         # load a saved checkpoint and verify metrics on test set
+```
+
+## Environment
+Create the conda environment (GPU optional):
+```bash
+conda env create -f environment.yml
+conda activate euclid-calib
+# If you don't have a compatible NVIDIA driver, comment the `pytorch-cuda` line in environment.yml and reinstall CPU-only PyTorch:
+#   conda install pytorch torchvision cpuonly -c pytorch -c conda-forge
+```
+
+## Quick Start (Train)
+Example: ResNet-50 on CIFAR-10 with cross-entropy, 50 epochs, AMP on GPU, save the best checkpoint and reliability plots every 10 epochs.
+```bash
+python train.py   --dataset cifar10 --data ./data   --backbone resnet50 --loss ce   --epochs 50 --batch-size 128 --lr 0.1 --weight-decay 5e-4   --amp   --ece-bins 15 --ts-every 1 --rd-every 10   --out-dir runs/c10_resnet50_ce   --log-csv metrics.csv   --save-dir checkpoints   --skip-if-done
+```
+Notes:
+- The code downloads CIFAR automatically to `--data`.
+- A lock file named like `lock_cifar10_resnet50_ce.lock` is created under `--out-dir`. If another server starts the same run, it will see the lock and skip.
+
+## Evaluate (with or without TS)
+```bash
+python evaluate.py --dataset cifar10 --data ./data --backbone resnet50 --out-dir runs_eval
+python evaluate.py --dataset cifar10 --data ./data --backbone resnet50 --out-dir runs_eval --no-ts
+python evaluate.py --dataset cifar10 --data ./data --backbone resnet50   --checkpoint checkpoints/best_cifar10_resnet50_ce.pt   --out-dir runs_eval
+```
+
+This produces a reliability diagram image under `--out-dir` and prints metrics.
+
+## Verify a Saved Model
+```bash
+python verify.py --dataset cifar10 --data ./data --backbone resnet50   --checkpoint checkpoints/best_cifar10_resnet50_ce.pt
+```
+
+## Multi-Machine Mutual Exclusion
+We use a simple lock-file protocol. If a lock is older than 48h, it is treated as stale and automatically recovered. The lock guards per-run key `{dataset}|{backbone}|{loss}`.
+
+## Reproducibility Tips
+- We set seeds (`--seed`, default 42). Due to cuDNN and data order, small variations can still occur.
+- Set `--ts-every 1` to perform temperature scaling each epoch for tracking TS metrics; or run `evaluate.py` at the end.
+- CSV logs are stored at `--out-dir/--log-csv` (default `metrics.csv`).
+
+## License
+MIT
