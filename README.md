@@ -4,91 +4,63 @@
 
 ## Reproducible CIFAR-10/100 Training: Multi-loss & Multi-backbone
 
-This repository contains a single self-contained training script that reproduces the experiments in your paper setup: multiple losses (CE, Brier, CE+0.1*Brier, Label Smoothing, Focal, Adaptive Focal, Dual Focal, AdaFocal) across multiple backbones (ResNet-50, ResNet-110 (CIFAR style), WideResNet-28x10, DenseNet-121). It also evaluates Temperature Scaling (TS), draws reliability diagrams, logs metrics to CSV, and uses cross-host lock files plus "done" markers so multiple workers won't duplicate the same job.
+Modular, reproducible code for training classification backbones on CIFAR with multiple loss functions, post-hoc **temperature scaling**, and **reliability diagrams**. The code supports **multi-machine mutual exclusion** via lock files so the same run won't start twice across servers.
+
+## Structure
+```
+.
+├── calibration.py    # metrics, temperature scaling, ECE/AdaECE/Classwise-ECE helpers
+├── data.py           # CIFAR loaders
+├── environment.yml   # conda environment
+├── evaluate.py       # evaluate (optionally with TS) + reliability diagram
+├── losses.py         # CE, Brier, CE+Brier, Focal, Label Smoothing
+├── models.py         # CIFAR backbones: ResNet-50 (CIFAR-style), ResNet-110, WRN-28-10, DenseNet-121
+├── reliability.py    # plotting utilities (reliability diagram)
+├── train.py          # training loop with CSV logging, TS, checkpoint saving, lock
+├── utils.py          # seeding, ETA formatting, cross-host lock helpers
+└── verify.py         # load a saved checkpoint and verify metrics on test set
+```
 
 ## Environment
-
-- Python 3.8+
-- PyTorch >= 2.0 (CUDA optional)
-- torchvision >= 0.15
-- matplotlib
-
-You can use conda to create a clean environment:
-
+Create the conda environment (GPU optional):
 ```bash
-conda create -y -n calib python=3.10
-conda activate calib
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121  # or cpu wheels
-pip install matplotlib
+conda env create -f environment.yml
+conda activate euclid-calib
+# If you don't have a compatible NVIDIA driver, comment the `pytorch-cuda` line in environment.yml and reinstall CPU-only PyTorch:
+#   conda install pytorch torchvision cpuonly -c pytorch -c conda-forge
 ```
 
-> If you prefer CPU-only: `pip install torch torchvision` (without the CUDA index). The script auto-disables AMP on CPU.
-
-## Files
-
-- `many_losses_multibackbone_training.py` — main training/eval script (single file).
-- Outputs (under `--out-dir`):
-  - `*_methods_log.csv` — per-epoch metrics.
-  - `reliability_<dataset>_<backbone>_<method>.png` — reliability diagrams (before vs after TS).
-  - `done_<dataset>_<backbone>_<method>.json` — done markers (used to skip on next runs).
-  - `error_*.txt` — traceback if a run crashes.
-  - `val_bin_stats.txt` — AdaFocal per-epoch bin statistics.
-
-## Quick Start
-
-CIFAR-10 with default backbones and all methods:
-
+## Quick Start (Train)
+Example: ResNet-50 on CIFAR-10 with cross-entropy, 50 epochs, AMP on GPU, save the best checkpoint and reliability plots every 10 epochs.
 ```bash
-python many_losses_multibackbone_training.py --dataset cifar10 --out-dir runs/c10
+python train.py   --dataset cifar10 --data ./data   --backbone resnet50 --loss ce   --epochs 50 --batch-size 128 --lr 0.1 --weight-decay 5e-4   --amp   --ece-bins 15 --ts-every 1 --rd-every 10   --out-dir runs/c10_resnet50_ce   --log-csv metrics.csv   --save-dir checkpoints   --skip-if-done
+```
+Notes:
+- The code downloads CIFAR automatically to `--data`.
+- A lock file named like `lock_cifar10_resnet50_ce.lock` is created under `--out-dir`. If another server starts the same run, it will see the lock and skip.
+
+## Evaluate (with or without TS)
+```bash
+python evaluate.py --dataset cifar10 --data ./data --backbone resnet50 --out-dir runs_eval
+python evaluate.py --dataset cifar10 --data ./data --backbone resnet50 --out-dir runs_eval --no-ts
+python evaluate.py --dataset cifar10 --data ./data --backbone resnet50   --checkpoint checkpoints/best_cifar10_resnet50_ce.pt   --out-dir runs_eval
 ```
 
-CIFAR-100:
+This produces a reliability diagram image under `--out-dir` and prints metrics.
 
+## Verify a Saved Model
 ```bash
-python many_losses_multibackbone_training.py --dataset cifar100 --out-dir runs/c100   --backbones resnet50,resnet110,wideresnet28x10,densenet121
+python verify.py --dataset cifar10 --data ./data --backbone resnet50   --checkpoint checkpoints/best_cifar10_resnet50_ce.pt
 ```
 
-Run a subset of backbones (example: only ResNet-50):
+## Multi-Machine Mutual Exclusion
+We use a simple lock-file protocol. If a lock is older than 48h, it is treated as stale and automatically recovered. The lock guards per-run key `{dataset}|{backbone}|{loss}`.
 
-```bash
-python many_losses_multibackbone_training.py --dataset cifar10 --out-dir runs/c10 --backbones resnet50
-```
-
-### Important Flags
-
-- `--skip-if-done` (default: on): will skip a specific (dataset, backbone, method) run if its `done_*.json` exists.
-- `--ts-every` (default: 1): perform Temperature Scaling evaluation every `ts-every` epochs for logging; reliability diagrams are generated after training finishes per run.
-- AdaFocal options:
-  - `--adafocal-num-bins 15`
-  - `--adafocal-lambda 2.0`
-  - `--adafocal-gamma-initial 5.0`
-  - `--adafocal-switch-pt 0.25`
-  - `--adafocal-gamma-max 8.0`
-  - `--adafocal-gamma-min -8.0`
-  - `--adafocal-update-every 1`
-
-## Cross-host Mutex and Safe Resume
-
-- The script creates a lock file per `(dataset|backbone|method)` key at: `lock_<key>.lock` inside `--out-dir`. If a lock exists, other workers skip that run.
-- Stale locks: if the lock's mtime is older than 48 hours, the script removes it once and retries.
-- After a run finishes, a `done_<dataset>_<backbone>_<method>.json` is written to allow `--skip-if-done` to skip next time.
-
-## Logged Metrics
-
-For each epoch and method:
-- `test_acc`, `test_ece`, `test_adaece`, `test_classwise_ece`, `test_nll`
-- The same after applying Temperature Scaling: `*_ts` columns
-- For FCL-Metaλ: `lambda_if_any`, `val_smooth_ece_if_any` are populated.
-
-At the end, the script draws line plots over epochs for accuracy/ECE/NLL etc., and saves per-run reliability diagrams.
-
-## Reproducibility Notes
-
-- We set a global seed (`--seed`, default 42) and use standard CIFAR-10/100 data augmentation (random crop + horizontal flip).
-- Learning rate schedule: MultiStepLR at epochs 150 and 250 with `gamma=0.1`.
-- Default epochs: 350.
-- AMP is automatically enabled on CUDA and disabled on CPU.
-
+## Reproducibility Tips
+- We set seeds (`--seed`, default 42). Due to cuDNN and data order, small variations can still occur.
+- Set `--ts-every 1` to perform temperature scaling each epoch for tracking TS metrics; or run `evaluate.py` at the end.
+- CSV logs are stored at `--out-dir/--log-csv` (default `metrics.csv`).
+- 
 ## Cite
 For Citing.
 
