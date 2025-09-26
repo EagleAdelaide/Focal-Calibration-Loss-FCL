@@ -1,4 +1,7 @@
-# Focal Calibration Loss FCL
+# Self-Adaptive Euclidean Calibration for Trustworthy Deep Neural Networks 
+# Focal Calibration Loss(FCL)
+<img width="3817" height="2300" alt="image" src="https://github.com/user-attachments/assets/b754eaf7-6835-4994-b5b9-cd70e8d9a733" />
+
 ## Reproducible CIFAR-10/100 Training: Multi-loss & Multi-backbone
 
 This repository contains a single self-contained training script that reproduces the experiments in your paper setup: multiple losses (CE, Brier, CE+0.1*Brier, Label Smoothing, Focal, Adaptive Focal, Dual Focal, AdaFocal) across multiple backbones (ResNet-50, ResNet-110 (CIFAR style), WideResNet-28x10, DenseNet-121). It also evaluates Temperature Scaling (TS), draws reliability diagrams, logs metrics to CSV, and uses cross-host lock files plus "done" markers so multiple workers won't duplicate the same job.
