@@ -1,4 +1,5 @@
-# Reproducible CIFAR-10/100 Training: Multi-loss & Multi-backbone
+# Focal Calibration Loss FCL
+## Reproducible CIFAR-10/100 Training: Multi-loss & Multi-backbone
 
 This repository contains a single self-contained training script that reproduces the experiments in your paper setup: multiple losses (CE, Brier, CE+0.1*Brier, Label Smoothing, Focal, Adaptive Focal, Dual Focal, AdaFocal) across multiple backbones (ResNet-50, ResNet-110 (CIFAR style), WideResNet-28x10, DenseNet-121). It also evaluates Temperature Scaling (TS), draws reliability diagrams, logs metrics to CSV, and uses cross-host lock files plus "done" markers so multiple workers won't duplicate the same job.
 
