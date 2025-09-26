@@ -87,11 +87,11 @@ At the end, the script draws line plots over epochs for accuracy/ECE/NLL etc., a
 - AMP is automatically enabled on CUDA and disabled on CPU.
 
 ## Cite
-If your paper needs to be cited in a blind review repo, please include your own reference here.
+For Citing.
 
 ---
 
-Good luck with your reviews! If reviewers only want a "single command to reproduce", point them to:
+If only want a "single command to reproduce", point them to:
 
 ```bash
 python many_losses_multibackbone_training.py --dataset cifar100 --out-dir runs/c100   --backbones resnet50,resnet110,wideresnet28x10,densenet121
