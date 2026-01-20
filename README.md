@@ -20,6 +20,7 @@ Focal:
 ![reliability_evolution_focal](https://github.com/user-attachments/assets/d14792e9-a7f3-4065-be7f-b1b5d74dabe1)
 
 Brier:
+![reliability_evolution_brier](https://github.com/user-attachments/assets/06cd5425-ddb6-4928-acef-2a77395092b4)
 
 Self-Adaptive Focal Calibration:
 
