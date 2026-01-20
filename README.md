@@ -8,7 +8,9 @@ Modular, reproducible code for training classification backbones on CIFAR with m
 
 ## Evolution of Reliabilty Diagram 
 Definition of OverConfidence/UnderConfidence:
-<img width="621" height="527" alt="image" src="https://github.com/user-attachments/assets/8bbd88b3-f1bd-40e8-9485-1401f62c927c" />
+
+<img width="804" height="573" alt="image" src="https://github.com/user-attachments/assets/e43f42d2-52d6-45f9-8adb-a684cc17e415" />
+
 
 
 CE: 
