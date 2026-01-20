@@ -10,7 +10,7 @@ Modular, reproducible code for training classification backbones on CIFAR with m
 Definition of OverConfidence/UnderConfidence:
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/e43f42d2-52d6-45f9-8adb-a684cc17e415" width="804" alt="Definition of OverConfidence/UnderConfidence" />
+  <img src="https://github.com/user-attachments/assets/0fbb02f2-114c-4848-95d1-08143f824ad0" width="804" alt="Definition of OverConfidence/UnderConfidence" />
 </p>
 
 
