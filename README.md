@@ -9,20 +9,18 @@ Modular, reproducible code for training classification backbones on CIFAR with m
 ## Evolution of Reliabilty Diagram 
 Definition of OverConfidence/UnderConfidence:
 
-<img width="804" height="573" alt="image" src="https://github.com/user-attachments/assets/e43f42d2-52d6-45f9-8adb-a684cc17e415" />
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/e43f42d2-52d6-45f9-8adb-a684cc17e415" width="804" alt="Definition of OverConfidence/UnderConfidence" />
+</p>
 
 
+| CE | Focal |
+|---|---|
+| <img src="https://github.com/user-attachments/assets/cd87b7dd-cdc1-4082-8e17-7f794057e9dc" width="420" alt="CE reliability evolution" /> | <img src="https://github.com/user-attachments/assets/d14792e9-a7f3-4065-be7f-b1b5d74dabe1" width="420" alt="Focal reliability evolution" /> |
 
-CE: 
-![reliability_evolution](https://github.com/user-attachments/assets/cd87b7dd-cdc1-4082-8e17-7f794057e9dc)
-
-Focal:
-![reliability_evolution_focal](https://github.com/user-attachments/assets/d14792e9-a7f3-4065-be7f-b1b5d74dabe1)
-
-Brier:
-![reliability_evolution_brier](https://github.com/user-attachments/assets/06cd5425-ddb6-4928-acef-2a77395092b4)
-
-Self-Adaptive Focal Calibration:
+| Brier | Self-Adaptive Focal Calibration |
+|---|---|
+| <img src="https://github.com/user-attachments/assets/06cd5425-ddb6-4928-acef-2a77395092b4" width="420" alt="Brier reliability evolution" /> | <img src="https://github.com/user-attachments/assets/5ce7cd8b-d5d8-4aac-81e9-b480854afbdf" width="420" alt="SA-FCL reliability evolution" /> |
 
 
 ## Structure
