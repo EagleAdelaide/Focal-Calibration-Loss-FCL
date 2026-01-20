@@ -6,6 +6,19 @@
 
 Modular, reproducible code for training classification backbones on CIFAR with multiple loss functions, post-hoc **temperature scaling**, and **reliability diagrams**. The code supports **multi-machine mutual exclusion** via lock files so the same run won't start twice across servers.
 
+## Evolution of Reliabilty Diagram 
+
+CE: 
+![reliability_evolution](https://github.com/user-attachments/assets/cd87b7dd-cdc1-4082-8e17-7f794057e9dc)
+
+Focal:
+![reliability_evolution_focal](https://github.com/user-attachments/assets/d14792e9-a7f3-4065-be7f-b1b5d74dabe1)
+
+Brier:
+
+Self-Adaptive Focal Calibration:
+
+
 ## Structure
 ```
 .
