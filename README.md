@@ -6,7 +6,7 @@
 
 Modular, reproducible code for training classification backbones on CIFAR with multiple loss functions, post-hoc **temperature scaling**, and **reliability diagrams**. The code supports **multi-machine mutual exclusion** via lock files so the same run won't start twice across servers.
 
-## Evolution of Reliabilty Diagram 
+## Evolution of Reliabilty Diagram （Restnet-18 on CIFAR-10）
 Definition of OverConfidence/UnderConfidence:
 
 <p align="center">
