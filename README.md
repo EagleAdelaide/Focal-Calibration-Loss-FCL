@@ -1,4 +1,4 @@
-# Self-Adaptive Euclidean Calibration for Trustworthy Deep Neural Networks 
+# Self-Adaptive Focal Calibration Loss for Trustworthy Deep Learning
 # Focal Calibration Loss(FCL)
 <img width="3817" height="2300" alt="image" src="https://github.com/user-attachments/assets/b754eaf7-6835-4994-b5b9-cd70e8d9a733" />
 
