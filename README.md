@@ -23,7 +23,7 @@ Definition of OverConfidence/UnderConfidence:
 | <img src="https://github.com/user-attachments/assets/06cd5425-ddb6-4928-acef-2a77395092b4" width="420" alt="Brier reliability evolution" /> | <img src="https://github.com/user-attachments/assets/5ce7cd8b-d5d8-4aac-81e9-b480854afbdf" width="420" alt="SA-FCL reliability evolution" /> |
 
 
-### Loss baselines (implemented)
+### Loss baselines
 - **CE + weight decay** (`wd_ce`)
 - **Label smoothing** (`label_smoothing`, default 0.05)
 - **Brier** (`brier`)
@@ -33,7 +33,7 @@ Definition of OverConfidence/UnderConfidence:
 - **Ungated FCL** = focal + λ·Brier (`fcl_ungated`)
 - **SA-FCL (ours)** (`safcl`) and **SA-FCL w/o stop-grad** (`safcl_nodetach`)
 
-### Metrics (reported per epoch)
+### Metrics
 - Accuracy
 - ECE / **adaECE** / **classECE**
 - **smECE**
@@ -68,7 +68,7 @@ done
 
 > Note: `safcl_nostop.yaml` uses the **no-stop-gradient** variant (`safcl_nodetach`) to demonstrate the “confidence collapse” behavior.
 
-## Training schedules (paper setting)
+## Training schedules 
 
 - **CIFAR-10/100**: 350 epochs, LR = 0.1 (0–149), 0.01 (150–249), 0.001 (250–349), SGD (momentum=0.9, wd=5e-4), batch=128.
 - **Tiny-ImageNet**: 100 epochs, LR = 0.1 (0–39), 0.01 (40–59), 0.001 (60–99), SGD, batch=128.
@@ -106,11 +106,6 @@ This produces:
 - `ece_vs_acc.png`
 - optional gradient-ratio plots if logged
 
-## Notes / Extending to other benchmarks
-This scaffold focuses on **CIFAR-style** vision benchmarks and OoD robustness. Hooks are present to add:
-- CheXNet (multi-label) training + thresholded metrics,
-- text CNN with GloVe,
-- long-tailed settings (CIFAR-LT/ImageNet-LT).
 
 See `src/data/` and `src/models/` for extension points.
 
