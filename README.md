@@ -23,61 +23,97 @@ Definition of OverConfidence/UnderConfidence:
 | <img src="https://github.com/user-attachments/assets/06cd5425-ddb6-4928-acef-2a77395092b4" width="420" alt="Brier reliability evolution" /> | <img src="https://github.com/user-attachments/assets/5ce7cd8b-d5d8-4aac-81e9-b480854afbdf" width="420" alt="SA-FCL reliability evolution" /> |
 
 
-## Structure
-```
-.
-├── calibration.py    # metrics, temperature scaling, ECE/AdaECE/Classwise-ECE helpers
-├── data.py           # CIFAR loaders
-├── environment.yml   # conda environment
-├── evaluate.py       # evaluate (optionally with TS) + reliability diagram
-├── losses.py         # CE, Brier, CE+Brier, Focal, Label Smoothing
-├── models.py         # CIFAR backbones: ResNet-50 (CIFAR-style), ResNet-110, WRN-28-10, DenseNet-121
-├── reliability.py    # plotting utilities (reliability diagram)
-├── train.py          # training loop with CSV logging, TS, checkpoint saving, lock
-├── utils.py          # seeding, ETA formatting, cross-host lock helpers
-└── verify.py         # load a saved checkpoint and verify metrics on test set
-```
+### Loss baselines (implemented)
+- **CE + weight decay** (`wd_ce`)
+- **Label smoothing** (`label_smoothing`, default 0.05)
+- **Brier** (`brier`)
+- **MMCE** (`mmce`)
+- **FLSD-53** (`flsd53`)
+- **Dual Focal** (`dual_focal`)
+- **Ungated FCL** = focal + λ·Brier (`fcl_ungated`)
+- **SA-FCL (ours)** (`safcl`) and **SA-FCL w/o stop-grad** (`safcl_nodetach`)
 
-## Environment
-Create the conda environment (GPU optional):
+### Metrics (reported per epoch)
+- Accuracy
+- ECE / **adaECE** / **classECE**
+- **smECE**
+- NLL, Brier
+- Evidence components (mean focal / brier / w / w·brier / p_t)
+
+### Robustness / OoD table
+- CIFAR → **SVHN** AUROC (MSP)
+- CIFAR → **CIFAR-10-C** AUROC (MSP), per-corruption and mean
+
+## Install
+
 ```bash
-conda env create -f environment.yml
-conda activate euclid-calib
-# If you don't have a compatible NVIDIA driver, comment the `pytorch-cuda` line in environment.yml and reinstall CPU-only PyTorch:
-#   conda install pytorch torchvision cpuonly -c pytorch -c conda-forge
+pip install -r requirements.txt
 ```
 
-## Quick Start (Train)
-Example: ResNet-50 on CIFAR-10 with cross-entropy, 50 epochs, AMP on GPU, save the best checkpoint and reliability plots every 10 epochs.
+## Quick start (CIFAR-10, ResNet-50)
+
+Each method has its own YAML under `configs/<dataset>/<model>/<method>.yaml`, and inherits a dataset/model base config from `configs/_base_/*.yaml`.
+
+Train **SA-FCL**:
 ```bash
-python train.py   --dataset cifar10 --data ./data   --backbone resnet50 --loss ce   --epochs 50 --batch-size 128 --lr 0.1 --weight-decay 5e-4   --amp   --ece-bins 15 --ts-every 1 --rd-every 10   --out-dir runs/c10_resnet50_ce   --log-csv metrics.csv   --save-dir checkpoints   --skip-if-done
+python train.py --cfg configs/cifar10/resnet50/safcl.yaml --out runs/cifar10_resnet50_safcl.jsonl
 ```
-Notes:
-- The code downloads CIFAR automatically to `--data`.
-- A lock file named like `lock_cifar10_resnet50_ce.lock` is created under `--out-dir`. If another server starts the same run, it will see the lock and skip.
 
-## Evaluate (with or without TS)
+Train **all baselines** for the same dataset/model (example):
 ```bash
-python evaluate.py --dataset cifar10 --data ./data --backbone resnet50 --out-dir runs_eval
-python evaluate.py --dataset cifar10 --data ./data --backbone resnet50 --out-dir runs_eval --no-ts
-python evaluate.py --dataset cifar10 --data ./data --backbone resnet50   --checkpoint checkpoints/best_cifar10_resnet50_ce.pt   --out-dir runs_eval
+for m in wd_ce label_smooth brier mmce flsd53 dual_focal fcl_ungated safcl safcl_nostop; do
+  python train.py --cfg configs/cifar10/resnet50/${m}.yaml --out runs/cifar10_resnet50_${m}.jsonl
+done
 ```
 
-This produces a reliability diagram image under `--out-dir` and prints metrics.
+> Note: `safcl_nostop.yaml` uses the **no-stop-gradient** variant (`safcl_nodetach`) to demonstrate the “confidence collapse” behavior.
 
-## Verify a Saved Model
+## Training schedules (paper setting)
+
+- **CIFAR-10/100**: 350 epochs, LR = 0.1 (0–149), 0.01 (150–249), 0.001 (250–349), SGD (momentum=0.9, wd=5e-4), batch=128.
+- **Tiny-ImageNet**: 100 epochs, LR = 0.1 (0–39), 0.01 (40–59), 0.001 (60–99), SGD, batch=128.
+- **Tiny-ImageNet uses a CIFAR-style stem** for ResNet/DenseNet (3×3 stride-1, no maxpool).
+
+These are encoded as `train.lr_schedule` inside `configs/_base_/*.yaml`.
+
+## Evaluate (metrics)
+
+You can compute metrics from a saved checkpoint:
+
 ```bash
-python verify.py --dataset cifar10 --data ./data --backbone resnet50   --checkpoint checkpoints/best_cifar10_resnet50_ce.pt
+python eval.py --ckpt path/to/checkpoint.pt --cfg configs/cifar10/resnet50/safcl.yaml
 ```
 
-## Multi-Machine Mutual Exclusion
-We use a simple lock-file protocol. If a lock is older than 48h, it is treated as stale and automatically recovered. The lock guards per-run key `{dataset}|{backbone}|{loss}`.
+## OoD robustness (SVHN, CIFAR-10-C)
 
-## Reproducibility Tips
-- We set seeds (`--seed`, default 42). Due to cuDNN and data order, small variations can still occur.
-- Set `--ts-every 1` to perform temperature scaling each epoch for tracking TS metrics; or run `evaluate.py` at the end.
-- CSV logs are stored at `--out-dir/--log-csv` (default `metrics.csv`).
-- 
+```bash
+python ood_eval.py --ckpt path/to/checkpoint.pt --cfg configs/cifar10/resnet50/safcl.yaml --svhn --cifar10c
+```
+
+- **SVHN** is downloaded via torchvision.
+- **CIFAR-10-C** is auto-downloaded from a canonical mirror into `./data/CIFAR-10-C/` (can be overridden by `--cifar10c_root`).
+
+## Evidence plot (per-epoch trends)
+
+Given a JSONL log produced by `train.py`, plot evidence components:
+
+```bash
+python calibrate_stats.py --jsonl runs/cifar10_resnet50_safcl.jsonl --out runs/plots/cifar10_resnet50_safcl
+```
+
+This produces:
+- `evidence_components.png`
+- `ece_vs_acc.png`
+- optional gradient-ratio plots if logged
+
+## Notes / Extending to other benchmarks
+This scaffold focuses on **CIFAR-style** vision benchmarks and OoD robustness. Hooks are present to add:
+- CheXNet (multi-label) training + thresholded metrics,
+- text CNN with GloVe,
+- long-tailed settings (CIFAR-LT/ImageNet-LT).
+
+See `src/data/` and `src/models/` for extension points.
+
 ## Cite
 For Citing.
 
