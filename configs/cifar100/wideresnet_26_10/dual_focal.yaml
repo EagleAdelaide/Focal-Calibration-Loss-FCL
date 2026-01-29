@@ -1,0 +1,6 @@
+_base_: _base_/cifar100_wideresnet_26_10.yaml
+exp_name: cifar100_wideresnet_26_10_dual_focal
+loss:
+  name: dual_focal
+  gamma: 2.0
+  beta: 1.0

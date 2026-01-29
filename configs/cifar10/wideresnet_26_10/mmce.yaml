@@ -1,0 +1,5 @@
+_base_: _base_/cifar10_wideresnet_26_10.yaml
+exp_name: cifar10_wideresnet_26_10_mmce
+loss:
+  name: mmce
+  lam: 1.0

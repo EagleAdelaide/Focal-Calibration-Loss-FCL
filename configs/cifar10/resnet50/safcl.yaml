@@ -1,0 +1,7 @@
+_base_: _base_/cifar10_resnet50.yaml
+exp_name: cifar10_resnet50_safcl
+loss:
+  name: safcl
+  gamma_focal: 2.0
+  gamma_cal: 2.0
+  lam: 1.0

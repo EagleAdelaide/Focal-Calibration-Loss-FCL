@@ -1,0 +1,5 @@
+_base_: _base_/tiny_imagenet_resnet50.yaml
+exp_name: tiny_imagenet_resnet50_mmce
+loss:
+  name: mmce
+  lam: 1.0

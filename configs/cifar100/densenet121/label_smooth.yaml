@@ -1,0 +1,5 @@
+_base_: _base_/cifar100_densenet121.yaml
+exp_name: cifar100_densenet121_label_smooth
+loss:
+  name: label_smoothing
+  smoothing: 0.05

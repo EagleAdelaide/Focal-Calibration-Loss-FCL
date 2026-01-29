@@ -1,0 +1,25 @@
+exp_name: cifar10_resnet18_fcl_ungated
+seed: 0
+dataset:
+  name: cifar10
+  root: ./data
+  num_workers: 4
+model:
+  name: resnet18
+train:
+  epochs: 100
+  batch_size: 128
+  lr: 0.1
+  momentum: 0.9
+  weight_decay: 0.0005
+  nesterov: true
+  scheduler: cosine
+  test_batch_size: 512
+loss:
+  name: fcl_ungated
+  gamma_focal: 2.0
+  lam: 1.0
+metrics:
+  ece_bins: 15
+out_dir: runs
+device: auto

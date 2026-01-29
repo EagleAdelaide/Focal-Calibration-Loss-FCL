@@ -1,0 +1,7 @@
+_base_: _base_/cifar10_wideresnet_26_10.yaml
+exp_name: cifar10_wideresnet_26_10_safcl_nostop
+loss:
+  name: safcl_nodetach
+  gamma_focal: 2.0
+  gamma_cal: 2.0
+  lam: 1.0

@@ -1,0 +1,4 @@
+_base_: _base_/cifar10_wideresnet_26_10.yaml
+exp_name: cifar10_wideresnet_26_10_flsd53
+loss:
+  name: flsd53

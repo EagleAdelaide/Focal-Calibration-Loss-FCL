@@ -1,0 +1,6 @@
+_base_: _base_/tiny_imagenet_resnet50.yaml
+exp_name: tiny_imagenet_resnet50_dual_focal
+loss:
+  name: dual_focal
+  gamma: 2.0
+  beta: 1.0

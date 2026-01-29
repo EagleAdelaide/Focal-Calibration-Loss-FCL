@@ -1,0 +1,30 @@
+dataset:
+  name: cifar10
+  root: ./data
+  download: true
+  num_workers: 4
+model:
+  name: resnet50
+  cifar_stem: true
+train:
+  epochs: 350
+  batch_size: 128
+  test_batch_size: 512
+  lr: 0.1
+  lr_schedule:
+  - - 0
+    - 0.1
+  - - 150
+    - 0.01
+  - - 250
+    - 0.001
+  optimizer: sgd
+  momentum: 0.9
+  weight_decay: 0.0005
+  nesterov: true
+metrics:
+  ece_bins: 15
+  sm_ece_bins: 15
+out_dir: runs
+device: auto
+exp_name: cifar10_resnet50_base

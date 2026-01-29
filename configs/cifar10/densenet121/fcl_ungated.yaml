@@ -1,0 +1,6 @@
+_base_: _base_/cifar10_densenet121.yaml
+exp_name: cifar10_densenet121_fcl_ungated
+loss:
+  name: fcl_ungated
+  gamma_focal: 2.0
+  lam: 1.0

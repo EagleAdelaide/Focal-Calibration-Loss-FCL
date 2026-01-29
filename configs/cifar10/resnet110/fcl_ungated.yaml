@@ -1,0 +1,6 @@
+_base_: _base_/cifar10_resnet110.yaml
+exp_name: cifar10_resnet110_fcl_ungated
+loss:
+  name: fcl_ungated
+  gamma_focal: 2.0
+  lam: 1.0
