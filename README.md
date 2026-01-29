@@ -114,10 +114,3 @@ For Citing.
 
 ---
 
-If only want a "single command to reproduce", point them to:
-
-```bash
-python many_losses_multibackbone_training.py --dataset cifar100 --out-dir runs/c100   --backbones resnet50,resnet110,wideresnet28x10,densenet121
-```
-
-This will download CIFAR-100 automatically and produce logs & figures under `runs/c100`.
