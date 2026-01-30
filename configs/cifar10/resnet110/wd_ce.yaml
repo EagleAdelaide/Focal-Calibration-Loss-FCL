@@ -1,4 +1,0 @@
-_base_: _base_/cifar10_resnet110.yaml
-exp_name: cifar10_resnet110_wd_ce
-loss:
-  name: ce_wd

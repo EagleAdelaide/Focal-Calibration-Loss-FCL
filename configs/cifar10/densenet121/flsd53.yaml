@@ -1,4 +1,0 @@
-_base_: _base_/cifar10_densenet121.yaml
-exp_name: cifar10_densenet121_flsd53
-loss:
-  name: flsd53

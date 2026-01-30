@@ -1,7 +1,0 @@
-_base_: _base_/tiny_imagenet_resnet50.yaml
-exp_name: tiny_imagenet_resnet50_safcl
-loss:
-  name: safcl
-  gamma_focal: 2.0
-  gamma_cal: 2.0
-  lam: 1.0

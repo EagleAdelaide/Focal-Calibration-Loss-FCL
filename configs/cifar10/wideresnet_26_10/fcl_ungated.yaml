@@ -1,6 +1,0 @@
-_base_: _base_/cifar10_wideresnet_26_10.yaml
-exp_name: cifar10_wideresnet_26_10_fcl_ungated
-loss:
-  name: fcl_ungated
-  gamma_focal: 2.0
-  lam: 1.0

@@ -1,4 +1,0 @@
-_base_: _base_/cifar10_wideresnet_26_10.yaml
-exp_name: cifar10_wideresnet_26_10_wd_ce
-loss:
-  name: ce_wd

@@ -1,4 +1,0 @@
-_base_: _base_/cifar100_densenet121.yaml
-exp_name: cifar100_densenet121_brier
-loss:
-  name: brier

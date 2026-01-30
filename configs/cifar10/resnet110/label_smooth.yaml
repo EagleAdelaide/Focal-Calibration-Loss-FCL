@@ -1,5 +1,0 @@
-_base_: _base_/cifar10_resnet110.yaml
-exp_name: cifar10_resnet110_label_smooth
-loss:
-  name: label_smoothing
-  smoothing: 0.05

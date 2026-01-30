@@ -1,4 +1,0 @@
-_base_: _base_/cifar100_resnet50.yaml
-exp_name: cifar100_resnet50_flsd53
-loss:
-  name: flsd53

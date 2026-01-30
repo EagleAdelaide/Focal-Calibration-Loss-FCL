@@ -1,6 +1,0 @@
-_base_: _base_/cifar10_densenet121.yaml
-exp_name: cifar10_densenet121_dual_focal
-loss:
-  name: dual_focal
-  gamma: 2.0
-  beta: 1.0

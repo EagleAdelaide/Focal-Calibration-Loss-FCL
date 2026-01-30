@@ -1,5 +1,0 @@
-_base_: _base_/cifar10_wideresnet_26_10.yaml
-exp_name: cifar10_wideresnet_26_10_label_smooth
-loss:
-  name: label_smoothing
-  smoothing: 0.05
