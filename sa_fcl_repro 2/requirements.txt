@@ -1,0 +1,11 @@
+torch>=2.1
+numpy>=1.23
+scipy>=1.10
+pillow>=10.0
+pyyaml>=6.0
+tqdm>=4.66
+matplotlib>=3.8
+scikit-learn>=1.3
+## Optional:
+# torchvision>=0.16  # only needed for Tiny-ImageNet loader and torchvision-pretrained models
+# timm>=0.9.12       # for DeiT/Swin via timm
