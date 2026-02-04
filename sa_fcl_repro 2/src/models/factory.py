@@ -29,7 +29,8 @@ def build_model(model: Union[Dict[str, Any], str], num_classes: int):
         try:
             import torchvision.models as tvm
             if name in ["resnet18", "resnet50"]:
-                tv_weights = getattr(getattr(tvm, f"{name.capitalize()}_Weights"), "DEFAULT", None)
+                # Torchvision uses ResNet18_Weights / ResNet50_Weights (capital N).
+                tv_weights = getattr(getattr(tvm, f"{name.replace('resnet', 'ResNet')}_Weights"), "DEFAULT", None)
             elif name in ["densenet121"]:
                 tv_weights = getattr(getattr(tvm, "DenseNet121_Weights"), "DEFAULT", None)
         except Exception:
