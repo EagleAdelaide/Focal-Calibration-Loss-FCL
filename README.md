@@ -2,9 +2,12 @@
 
 <img width="3817" height="2300" alt="image" src="https://github.com/user-attachments/assets/b754eaf7-6835-4994-b5b9-cd70e8d9a733" />
 
-## Reproducible CIFAR-10/100 Training: Multi-loss & Multi-backbone
+This repository is a minimal, **runnable** scaffold for training and evaluating **Self-Adaptive Focal Calibration Loss (SA-FCL)** on CIFAR.
 
-Modular, reproducible code for training classification backbones on CIFAR with multiple loss functions, post-hoc **temperature scaling**, and **reliability diagrams**. The code supports **multi-machine mutual exclusion** via lock files so the same run won't start twice across servers.
+Key points:
+- **No hard dependency on torchvision** for CIFAR/SVHN (some environments have incompatible torchvision builds).  
+- CIFAR-10/100 and SVHN are **downloaded on first run** (internet required). You can also **manually place** the extracted datasets under `./data/`.
+- Training outputs **checkpoints** and a **metrics JSONL** file under `./runs/`.
 
 ## Evolution of Reliabilty Diagram （Restnet-18 on CIFAR-10）
 Definition of OverConfidence/UnderConfidence:
@@ -22,14 +25,6 @@ Definition of OverConfidence/UnderConfidence:
 |---|---|
 | <img src="https://github.com/user-attachments/assets/06cd5425-ddb6-4928-acef-2a77395092b4" width="420" alt="Brier reliability evolution" /> | <img src="https://github.com/user-attachments/assets/5ce7cd8b-d5d8-4aac-81e9-b480854afbdf" width="420" alt="SA-FCL reliability evolution" /> |
 
-# SA-FCL Reproduction Guideline
-
-This repository is a minimal, **runnable** scaffold for training and evaluating **Self-Adaptive Focal Calibration Loss (SA-FCL)** on CIFAR.
-
-Key points:
-- **No hard dependency on torchvision** for CIFAR/SVHN (some environments have incompatible torchvision builds).  
-- CIFAR-10/100 and SVHN are **downloaded on first run** (internet required). You can also **manually place** the extracted datasets under `./data/`.
-- Training outputs **checkpoints** and a **metrics JSONL** file under `./runs/`.
 
 ---
 
@@ -96,7 +91,7 @@ python eval.py --cfg configs/cifar10_resnet18_safcl.yaml \
 
 ## 4) Temperature scaling
 
-Fits temperature on the validation split (here: CIFAR test split in this scaffold) and writes a JSON file.
+Fits temperature on a held-out validation split from the training set and writes a JSON file.
 
 ```bash
 python calibrate_ts.py --cfg configs/cifar10_resnet18_safcl.yaml \
@@ -113,7 +108,7 @@ python calibrate_ts.py --cfg configs/cifar10_resnet18_safcl.yaml \
 ```bash
 python ood_eval.py --config configs/cifar10_resnet18_safcl.yaml \
   --ckpt runs/cifar10_resnet18_safcl_seed0/best.pt \
-  --ood svhn
+  --svhn
 ```
 
 ### CIFAR-10-C corruptions
@@ -121,10 +116,9 @@ python ood_eval.py --config configs/cifar10_resnet18_safcl.yaml \
 ```bash
 python ood_eval.py --config configs/cifar10_resnet18_safcl.yaml \
   --ckpt runs/cifar10_resnet18_safcl_seed0/best.pt \
-  --ood cifar10c \
-  --corruption gaussian_noise \
-  --severity 5 \
-  --download_cifar10c
+  --cifar10c \
+  --cifar10c_corruptions gaussian_noise \
+  --cifar10c_severity 5
 ```
 
 ---
@@ -154,6 +148,7 @@ For SVHN, place the `.mat` files under:
 export OMP_NUM_THREADS=1
 export MKL_NUM_THREADS=1
 ```
+
 ## Cite
 For Citing.
 
