@@ -186,3 +186,15 @@ def build_loaders(
         persistent_workers=(num_workers > 0),
     )
     return train_loader, test_loader, num_classes
+
+
+def split_train_val(dataset: Dataset, val_ratio: float = 0.1, seed: int = 0):
+    """Deterministically split a dataset into train/val subsets."""
+    if not 0.0 < float(val_ratio) < 1.0:
+        raise ValueError("val_ratio must be in (0,1)")
+    n = len(dataset)
+    n_val = int(round(n * float(val_ratio)))
+    n_val = max(1, min(n - 1, n_val))
+    g = torch.Generator()
+    g.manual_seed(int(seed))
+    return torch.utils.data.random_split(dataset, [n - n_val, n_val], generator=g)
