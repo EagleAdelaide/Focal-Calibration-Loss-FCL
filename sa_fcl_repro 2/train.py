@@ -227,12 +227,12 @@ def train_one_seed(cfg: dict, seed: int, out_jsonl: Optional[str] = None) -> str
         if stats.ece < best["ece"]:
             best.update({"ece": float(stats.ece), "epoch": int(ep)})
             save_ckpt(
-                os.path.join(run_dir, "ckpt_best.pt"),
+                os.path.join(run_dir, "best.pt"),
                 {"model": model.state_dict(), "cfg": cfg, "epoch": ep, "best": best},
             )
 
         save_ckpt(
-            os.path.join(run_dir, "ckpt_last.pt"),
+            os.path.join(run_dir, "last.pt"),
             {"model": model.state_dict(), "cfg": cfg, "epoch": ep, "best": best},
         )
 
@@ -282,6 +282,8 @@ def main(argv: Optional[Sequence[str]] = None):
     ap.add_argument("--seeds", type=int, nargs="*", default=None, help="Optional list of seeds")
     ap.add_argument("--device", type=str, default=None)
     ap.add_argument("--out", dest="out_jsonl", type=str, default=None, help="Optional metrics JSONL path")
+    ap.add_argument("--out_dir", type=str, default=None, help="Override output root (default: cfg.out_dir or runs)")
+    ap.add_argument("--exp_name", type=str, default=None, help="Override experiment name (default: cfg.exp_name or exp)")
     ap.add_argument(
         "--opts",
         nargs="*",
@@ -295,6 +297,10 @@ def main(argv: Optional[Sequence[str]] = None):
         cfg = merge_overrides(cfg, args.opts)
     if args.device is not None:
         cfg["device"] = args.device
+    if args.out_dir is not None:
+        cfg["out_dir"] = args.out_dir
+    if args.exp_name is not None:
+        cfg["exp_name"] = args.exp_name
 
     seeds = args.seeds if args.seeds is not None and len(args.seeds) > 0 else [int(cfg.get("seed", 0))]
     multi = len(seeds) > 1
