@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import torch
 import torch.nn as nn
@@ -59,6 +60,9 @@ def eval_with_temperature(model, loader, device: str, num_classes: int, T: float
     return EvalStats(
         acc=correct / max(total, 1),
         ece=ece,
+        ada_ece=float("nan"),
+        class_ece=float("nan"),
+        sm_ece=float("nan"),
         nll=nll_sum / max(total, 1),
         brier=brier_sum / max(total, 1),
     )
@@ -70,6 +74,7 @@ def main():
     ap.add_argument("--val_ratio", type=float, default=0.1)
     ap.add_argument("--device", type=str, default="auto")
     ap.add_argument("--max_iter", type=int, default=50)
+    ap.add_argument("--out", type=str, default=None, help="Optional JSON output path.")
     args = ap.parse_args()
 
     cfg = load_config(args.config)
@@ -120,6 +125,15 @@ def main():
     print(f"[TS] optimal T={T:.4f}")
     print(f"[Pre]  acc={pre.acc*100:.2f}%  ece={pre.ece:.4f}  nll={pre.nll:.4f}  brier={pre.brier:.4f}")
     print(f"[Post] acc={post.acc*100:.2f}%  ece={post.ece:.4f}  nll={post.nll:.4f}  brier={post.brier:.4f}")
+
+    if args.out:
+        out = {
+            "T": T,
+            "pre": {"acc": pre.acc, "ece": pre.ece, "nll": pre.nll, "brier": pre.brier},
+            "post": {"acc": post.acc, "ece": post.ece, "nll": post.nll, "brier": post.brier},
+        }
+        with open(args.out, "w", encoding="utf-8") as f:
+            json.dump(out, f, indent=2)
 
 if __name__ == "__main__":
     main()
