@@ -46,6 +46,11 @@ def ece(probs: torch.Tensor, targets: torch.Tensor, n_bins: int = 15) -> float:
     return _ece_from_conf_correct(conf, correct, n_bins=n_bins)
 
 
+# Backwards-compat name used by calibrate_ts.py
+def expected_calibration_error(probs: torch.Tensor, targets: torch.Tensor, n_bins: int = 15) -> float:
+    return ece(probs, targets, n_bins=n_bins)
+
+
 @torch.no_grad()
 def adaptive_ece(probs: torch.Tensor, targets: torch.Tensor, n_bins: int = 15) -> float:
     """
