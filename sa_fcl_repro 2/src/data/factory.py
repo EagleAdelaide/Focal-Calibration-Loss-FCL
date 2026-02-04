@@ -30,6 +30,10 @@ def build_dataloaders(cfg):
         ti_cfg.setdefault("batch_size", int(cfg["train"]["batch_size"]))
         ti_cfg.setdefault("workers", int(cfg["dataset"].get("num_workers", 4)))
         ti_cfg.setdefault("pin_memory", True)
-        return get_tiny_imagenet_loaders(ti_cfg)
+        train_loader, val_loader, test_loader, num_classes = get_tiny_imagenet_loaders(ti_cfg)
+        # Keep the public contract consistent: return (train_loader, test_loader, num_classes).
+        # Tiny-ImageNet uses val as its canonical evaluation split; the helper returns
+        # both val and test (alias). Use val_loader here to avoid mismatched unpacking.
+        return train_loader, val_loader, num_classes
 
     raise ValueError(f"Dataset not implemented in this scaffold: {name}")
